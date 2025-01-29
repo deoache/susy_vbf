@@ -9,8 +9,8 @@ data_samples = {
         "2017": ["SingleMuonB", "SingleMuonC", "SingleMuonD", "SingleMuonE", "SingleMuonF"],
     }
 }
-background_samples = [
-    "ztojets": {
+background_samples = {
+    "ztojets": [
         # DYJetsToLL
         "DYJetsToLL_M-4to50_HT-100to200",
         "DYJetsToLL_M-4to50_HT-200to400",
@@ -58,8 +58,8 @@ background_samples = [
         "WW",
         "WZ",
         "ZZ",
-    },
-    "ttbar": {
+    ],
+    "ttbar": [
         # DYJetsToLL
         "DYJetsToLL_M-4to50_HT-100to200",
         "DYJetsToLL_M-4to50_HT-200to400",
@@ -101,9 +101,8 @@ background_samples = [
         "WW",
         "WZ",
         "ZZ",
-    }
-    
-]
+    ]
+}
 
 
 if __name__ == "__main__":
@@ -112,7 +111,7 @@ if __name__ == "__main__":
         "--processor",
         dest="processor",
         type=str,
-        default="ztojets",
+        default="ttbar",
         help="processor to be used {ztojets} (default ztojets)",
     )
     parser.add_argument(
@@ -133,7 +132,7 @@ if __name__ == "__main__":
         "--label",
         dest="label",
         type=str,
-        default="ztojets_CR",
+        default="test",
         help="Tag to label the run (default ztojets_CR)",
     )
     parser.add_argument(
