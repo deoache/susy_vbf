@@ -5,11 +5,13 @@ import argparse
 from coffea import processor
 from humanfriendly import format_timespan
 from analysis.processors.ztojets import ZToJets
+from analysis.processors.ttbar import Ttbar
 
 
 def main(args):
     processors = {
         "ztojets": ZToJets(year=args.year, flow=eval(args.flow)),
+        "ttbar": Ttbar(year=args.year, flow=eval(args.flow)),
     }
     t0 = time.monotonic()
     out = processor.run_uproot_job(
