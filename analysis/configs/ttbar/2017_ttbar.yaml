@@ -1,0 +1,227 @@
+golden_json: analysis/data/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt
+hlt_paths:
+  - Mu50
+  - OldMu100
+  - TkMu100
+object_selection:
+  muons:
+    field: events.Muon
+    cuts:
+      min_pt: events.Muon.pt > 35
+      eta: np.abs(events.Muon.eta) < 2.4
+      muons_id: highpt
+      muons_iso: tight
+  electrons:
+    field: events.Electron
+    cuts:
+      min_pt: events.Electron.pt > 30
+      eta: (np.abs(events.Electron.eta) < 2.4) & ((np.abs(events.Electron.eta) < 1.44) | (np.abs(events.Electron.eta) > 1.57))
+      electrons_id: wp90iso
+      electrons_muons_dr: delta_r_mask(events.Electron, objects['muons'], 0.4)
+  taus:
+    field: events.Tau
+    cuts:
+      min_pt: events.Tau.pt > 20
+      eta: np.abs(events.Tau.eta) < 2.3
+      dz: np.abs(events.Tau.dz) < 0.2
+      taus_vs_jet: loose
+      taus_vs_ele: vvloose
+      taus_vs_mu: loose
+      taus_decaymode: 13
+      taus_electrons_dr: delta_r_mask(events.Tau, objects['electrons'], 0.3)
+      taus_muons_dr: delta_r_mask(events.Tau, objects['muons'], 0.3)
+  bjets:
+    field: events.Jet
+    cuts:
+      min_pt: events.Jet.pt > 20
+      eta: np.abs(events.Jet.eta) < 2.4
+      jets_id: tightlepveto
+      jets_deepjet_b: medium
+      jets_pileup_id: tight
+      jetsvetomaps: jetvetomaps_mask(events.Jet, '2017')
+      jets_electrons_dr: delta_r_mask(events.Jet, objects['electrons'], 0.4)
+      jets_muons_dr: delta_r_mask(events.Jet, objects['muons'], 0.4)
+      jets_taus_dr: delta_r_mask(events.Jet, objects['taus'], 0.4)
+  met:
+    field: events.MET
+    cuts: null
+event_selection:
+  selections:
+    goodvertex: events.PV.npvsGood > 0
+    lumi: get_lumi_mask(events, goldenjson)
+    trigger: get_trigger_mask(events, hlt_paths)
+    trigger_match: get_trigger_match_mask(events, hlt_paths)
+    metfilters: get_metfilters_mask(events, year)
+    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
+    met_150: objects['met'].pt > 150
+    met_200: objects['met'].pt > 200
+    one_bjet: ak.num(objects['bjets']) == 1
+    tau_veto: ak.num(objects['taus']) == 0
+    electron_veto: ak.num(objects['electrons']) == 0
+    one_muon: ak.num(objects['muons']) == 1
+  categories:
+    met_150:
+      - goodvertex
+      - lumi
+      - trigger
+      - trigger_match
+      - metfilters
+      - dy_stitching
+      - met_150
+      - one_bjet
+      - tau_veto
+      - electron_veto
+      - one_muon
+    met_200:
+      - goodvertex
+      - lumi
+      - trigger
+      - trigger_match
+      - metfilters
+      - dy_stitching
+      - met_200
+      - one_bjet
+      - tau_veto
+      - electron_veto
+      - one_muon
+histogram_config:
+  add_syst_axis: true
+  add_weight: true
+  axes:
+    muon_pt:
+      type: Variable
+      edges:
+        - 30
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(\mu)$ [GeV]
+      expression: objects['muons'].pt
+    muon_eta:
+      type: Regular
+      bins: 50
+      start: -2.4
+      stop: 2.4
+      label: $\eta(\mu)$
+      expression: objects['muons'].eta
+    muon_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(\mu)$
+      expression: objects['muons'].phi
+    jet_pt:
+      type: Variable
+      edges:
+        - 20
+        - 60
+        - 90
+        - 120
+        - 150
+        - 180
+        - 210
+        - 240
+        - 300
+        - 500
+      label: $p_T(j)$ [GeV]
+      expression: objects['bjets'].pt
+    jet_eta:
+      type: Regular
+      bins: 50
+      start: -2.4
+      stop: 2.4
+      label: $\eta(j)$
+      expression: objects['bjets'].eta
+    jet_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(j)$
+      expression: objects['bjets'].phi
+    met:
+      type: Variable
+      edges:
+        - 50
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+      label: $p_T^{miss}$ [GeV]
+      expression: objects['met'].pt
+    met_phi:
+      type: Regular
+      bins: 50
+      start: -3.14159
+      stop: 3.14159
+      label: $\phi(p_T^{miss})$ [GeV]
+      expression: objects['met'].phi
+    muon_met_mass:
+      type: Variable
+      edges:
+        - 40
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+        - 800
+      label: $m_T(\mu, p_T^{miss}) [GeV]
+      expression: np.sqrt(2.0 * objects['muons'].pt * objects['met'].pt * (ak.ones_like(objects['met'].pt) - np.cos(objects['muons'].delta_phi(objects['met']))))
+    muon_bjet_mass:
+      type: Variable
+      edges:
+        - 40
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+      label: $m(\mu, bjet) [GeV]
+      expression: (objects['muons'] + ak.pad_none(objects['bjets'], target=2)[:, 0]).mass
+    muon_met_bjet_mass:
+      type: Variable
+      edges:
+        - 40
+        - 75
+        - 100
+        - 125
+        - 150
+        - 175
+        - 200
+        - 300
+        - 500
+        - 800
+      label: $m_T^{tot}(\mu, p_T^{miss}, bjet) [GeV]
+      expression: np.sqrt((objects['muons'].pt + ak.pad_none(objects['bjets'], target=2)[:, 0].pt + objects['met'].pt) ** 2 - (objects['muons'] + ak.pad_none(objects['bjets'], target=2)[:, 0] + objects['met']).pt ** 2)
+  layout:
+    ttbar_met_mass:
+      - muon_met_bjet_mass
+      - muon_bjet_mass
+      - muon_met_mass
+      - met
+    muons:
+      - muon_pt
+      - muon_eta
+      - muon_phi
+    bjets:
+      - jet_pt
+      - jet_eta
+      - jet_phi
