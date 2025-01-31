@@ -66,7 +66,7 @@ class ZToJets(processor.ProcessorABC):
             # -------------------------------------------------------------
             # object corrections
             # -------------------------------------------------------------
-            """
+            
             apply_jec = True
             apply_jer = False
             apply_jec_syst = False
@@ -82,10 +82,12 @@ class ZToJets(processor.ProcessorABC):
                 apply_jec_syst=apply_jec_syst, 
                 apply_jer_syst=apply_jer_syst
             )
-            """
+            
             if is_mc:
                 # apply JEC/JER corrections to jets (in data, the corrections are already applied)
+                """
                 apply_jet_corrections(events, year)
+                """
                 # apply energy corrections to taus (only to MC)
                 apply_tau_energy_scale_corrections(
                     events=events, year=year, variation=syst_var
@@ -187,6 +189,32 @@ class ZToJets(processor.ProcessorABC):
             if syst_var == "nominal":
                 # save sum of weights before object_selection
                 output["metadata"].update({"sumw": ak.sum(weights_container.weight())})
+            
+            """
+            print(f"{ak.sum(weights_container.partial_weight(include=['genweight']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['l1prefiring']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['pileup']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['pujetid']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['btag_bc']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['btag_light']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['electron_id_wp90iso']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['electron_RecoAbove20']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['electron_RecoBelow20']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['muon_reco']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['muon_id_tight']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['muon_iso_tight']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['muon_triggeriso']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['tau_vs_electron_vvloose']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['tau_vs_muon_loose']))=}")
+            print(f"{ak.sum(weights_container.partial_weight(include=['tau_vs_jet_loose_pt']))=}")
+            
+            print(f"{ak.sum(weights_container.weight())=}")
+            print()
+            print()
+            print()
+            print()
+            print()
+            """
             # -------------------------------------------------------------
             # object selection
             # -------------------------------------------------------------
