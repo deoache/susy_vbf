@@ -67,9 +67,13 @@ def apply_tau_energy_scale_corrections(
     )
     # define shifts
     shifts = {"nominal": "nom", "tau_up": "up", "tau_down": "down"}
+    if variation not in shifts:
+        shift = "nom"
+    else:
+        shift = shifts[variation]
     # get scale factor
     sf = cset["tau_energy_scale"].evaluate(
-        pt, eta, dm, genmatch, "DeepTau2017v2p1", shifts[variation]
+        pt, eta, dm, genmatch, "DeepTau2017v2p1", shift
     )
     # get new (pT, mass) values using the scale factor
     taus_new_pt = taus_filter.pt * sf
@@ -88,11 +92,11 @@ def apply_tau_energy_scale_corrections(
     # propagate tau pT corrections to MET
     # propagate muon pT corrections to MET
     corrected_met_pt, corrected_met_phi = corrected_polar_met(
-        met_pt=events.MET.pt, 
-        met_phi=events.MET.phi, 
-        other_phi=events.Tau.phi, 
-        other_pt_old=events.Tau.pt_raw, 
-        other_pt_new=events.Tau.pt
+        met_pt=events.MET.pt,
+        met_phi=events.MET.phi,
+        other_phi=events.Tau.phi,
+        other_pt_old=events.Tau.pt_raw,
+        other_pt_new=events.Tau.pt,
     )
     # update MET fields
     events["MET", "pt"] = corrected_met_pt
