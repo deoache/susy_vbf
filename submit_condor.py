@@ -57,12 +57,29 @@ if __name__ == "__main__":
         default="2017",
         help="year of the data {2016preVFP, 2016postVFP, 2017, 2018} (default 2017)",
     )
+    arser.add_argument(
+        "--lepton_flavor",
+        dest="lepton_flavor",
+        type=str,
+        default="mu",
+        help="lepton flavor to be processed (mu)",
+    )
+    parser.add_argument(
+        "--channel",
+        dest="channel",
+        type=str,
+        default="1b1l",
+        help="channel to be processed (1b1l, 2b1l)",
+    )
     parser.add_argument(
         "--flow",
-        dest="flow",
-        type=str,
-        default="True",
-        help="whether to include underflow/overflow to first/last bin {True, False} (default True)",
+        action="store_true",
+        help="whether to include underflow/overflow to first/last bin {True, False}",
+    )
+    parser.add_argument(
+        "--systematics",
+        action="store_true",
+        help="Enable applying jerc systematics",
     )
     parser.add_argument(
         "--submit",
