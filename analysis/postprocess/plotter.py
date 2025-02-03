@@ -23,6 +23,8 @@ class Plotter:
         processed_histograms: dict,
         year: str,
         lumi: int,
+        channel: str,
+        lepton_flavor: str,
         output_dir: str = None,
     ):
         self.processor = processor
@@ -30,9 +32,13 @@ class Plotter:
         self.year = year
         self.lumi = lumi
         self.output_dir = output_dir
+        self.channel = channel
+        self.lepton_flavor = lepton_flavor
 
         # get histogram config
-        config_builder = ProcessorConfigBuilder(processor=processor, year=year)
+        config_builder = ProcessorConfigBuilder(
+            processor=processor, year=year, channel=channel, lepton_flavor=lepton_flavor
+        )
         processor_config = config_builder.build_processor_config()
         self.histogram_config = processor_config.histogram_config
 

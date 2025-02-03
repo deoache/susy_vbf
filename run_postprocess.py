@@ -17,7 +17,12 @@ def main(args):
     setup_logger(args.output_dir)
 
     # load and save processor config
-    config_builder = ProcessorConfigBuilder(processor=args.processor, year=args.year)
+    config_builder = ProcessorConfigBuilder(
+        processor=args.processor,
+        year=args.year,
+        channel=args.channel,
+        lepton_flavor=args.lepton_flavor,
+    )
     processor_config = config_builder.build_processor_config()
     logging.info(processor_config.to_yaml())
 
@@ -26,6 +31,8 @@ def main(args):
         processor=args.processor,
         year=args.year,
         output_dir=args.output_dir,
+        lepton_flavor=args.lepton_flavor,
+        channel=args.channel,
     )
     processed_histograms = postprocessor.histograms
     lumi = postprocessor.luminosities[args.year]
@@ -38,6 +45,8 @@ def main(args):
         year=args.year,
         lumi=lumi,
         output_dir=args.output_dir,
+        channel=args.channel,
+        lepton_flavor=args.lepton_flavor,
     )
     for category in postprocessor.categories:
         logging.info(f"plotting histograms for category: {category}")
@@ -58,8 +67,8 @@ if __name__ == "__main__":
         "--processor",
         dest="processor",
         type=str,
-        default="ztojets",
-        help="processor to be used {ztojets}",
+        default="ttbar",
+        help="processor to be used {ttbar}",
     )
     parser.add_argument(
         "--year",
@@ -98,6 +107,20 @@ if __name__ == "__main__":
         type=str,
         default="",
         help="Path to the outputs directory (optional)",
+    )
+    parser.add_argument(
+        "--lepton_flavor",
+        dest="lepton_flavor",
+        type=str,
+        default="mu",
+        help="lepton flavor to be processed (mu)",
+    )
+    parser.add_argument(
+        "--channel",
+        dest="channel",
+        type=str,
+        default="2b1l",
+        help="channel to be processed (1b1l, 2b1l)",
     )
     args = parser.parse_args()
     main(args)

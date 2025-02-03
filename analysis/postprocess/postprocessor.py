@@ -15,10 +15,14 @@ class Postprocessor:
         processor: str,
         year: str,
         output_dir: str,
+        channel: str,
+        lepton_flavor: str,
     ):
         self.processor = processor
         self.year = year
         self.output_dir = output_dir
+        self.channel = channel
+        self.lepton_flavor = lepton_flavor
 
         # get datasets configs
         main_dir = Path.cwd()
@@ -26,7 +30,9 @@ class Postprocessor:
         with open(f"{fileset_path}/{year}_fileset.yaml", "r") as f:
             self.dataset_config = yaml.safe_load(f)
         # get categories
-        config_builder = ProcessorConfigBuilder(processor=processor, year=year)
+        config_builder = ProcessorConfigBuilder(
+            processor=processor, year=year, channel=channel, lepton_flavor=lepton_flavor
+        )
         processor_config = config_builder.build_processor_config()
         self.categories = processor_config.event_selection["categories"]
         # run postprocessor
