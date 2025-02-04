@@ -256,13 +256,13 @@ ST_s-channel_4f_leptonDecays:
 ST_t-channel_antitop_5f_InclusiveDecays:
   is_mc: true
   process: SingleTop
-  query: ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
-  xsec: 71.74
+  query: ST_t-channel_antitop_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v2/NANOAODSIM
+  xsec: 80.95
 ST_t-channel_top_5f_InclusiveDecays:
   is_mc: true
   process: SingleTop
-  query: ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL16NanoAODAPVv9-106X_mcRun2_asymptotic_preVFP_v11-v1/NANOAODSIM
-  xsec: 71.74
+  query: ST_t-channel_top_5f_InclusiveDecays_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17NanoAODv9-106X_mc2017_realistic_v9-v1/NANOAODSIM
+  xsec: 136.02
 ST_t-channel_antitop_4f_InclusiveDecays:
   is_mc: true
   process: SingleTop
