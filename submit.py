@@ -4,13 +4,11 @@ import pickle
 import argparse
 from coffea import processor
 from humanfriendly import format_timespan
-from analysis.processors.ztojets import ZToJets
 from analysis.processors.ttbar import Ttbar
 
 
 def main(args):
     processors = {
-        "ztojets": ZToJets(year=args.year, flow=args.flow),
         "ttbar": Ttbar(year=args.year, flow=args.flow, systematics=args.systematics),
     }
     t0 = time.monotonic()

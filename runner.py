@@ -2,63 +2,11 @@ import os
 import argparse
 
 data_samples = {
-    "ztojets": {
-        "2017": ["SingleMuonB", "SingleMuonC", "SingleMuonD", "SingleMuonE", "SingleMuonF"],
-    },
     "ttbar": {
         "2017": ["SingleMuonB", "SingleMuonC", "SingleMuonD", "SingleMuonE", "SingleMuonF"],
     }
 }
 background_samples = {
-    "ztojets": [
-        # DYJetsToLL
-        "DYJetsToLL_M-4to50_HT-100to200",
-        "DYJetsToLL_M-4to50_HT-200to400",
-        "DYJetsToLL_M-4to50_HT-400to600",
-        "DYJetsToLL_M-4to50_HT-600toInf",
-        "DYJetsToLL_M-50_HT-100to200",
-        "DYJetsToLL_M-50_HT-1200to2500",
-        "DYJetsToLL_M-50_HT-200to400",
-        "DYJetsToLL_M-50_HT-2500toInf",
-        "DYJetsToLL_M-50_HT-400to600",
-        "DYJetsToLL_M-50_HT-600to800",
-        "DYJetsToLL_M-50_HT-70to100",
-        "DYJetsToLL_M-50_HT-800to1200",
-        "DYJetsToLL_inclusive_10to50",
-        "DYJetsToLL_inclusive_50",
-        # EWK
-        "EWKWMinus2Jets_WToLNu",
-        "EWKWPlus2Jets_WToLNu",
-        "EWKZ2Jets_ZToLL",
-        "EWKZ2Jets_ZToNuNu",
-        # Higgs
-        "GluGluHToWWToLNuQQ",
-        "VBFHToWWTo2L2Nu",
-        "VBFHToWWToLNuQQ",
-        # SingleTop
-        "ST_s-channel_4f_leptonDecays",
-        "ST_t-channel_antitop_4f_InclusiveDecays",
-        "ST_t-channel_top_4f_InclusiveDecays",
-        "ST_tW_antitop_5f_inclusiveDecays",
-        "ST_tW_top_5f_inclusiveDecays",
-        # tt
-        "TTTo2L2Nu",
-        "TTToHadronic",
-        "TTToSemiLeptonic",
-        # WJetsToLNu
-        "WJetsToLNu_HT-100To200",
-        "WJetsToLNu_HT-1200To2500",
-        "WJetsToLNu_HT-200To400",
-        "WJetsToLNu_HT-2500ToInf",
-        "WJetsToLNu_HT-400To600",
-        "WJetsToLNu_HT-600To800",
-        "WJetsToLNu_HT-800To1200",
-        "WJetsToLNu_inclusive",
-        # Diboson
-        "WW",
-        "WZ",
-        "ZZ",
-    ],
     "ttbar": [
         # DYJetsToLL
         "DYJetsToLL_M-4to50_HT-100to200",
