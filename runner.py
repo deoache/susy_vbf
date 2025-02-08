@@ -125,8 +125,8 @@ if __name__ == "__main__":
         "--nfiles",
         dest="nfiles",
         type=int,
-        default=20,
-        help="number of root files to include in each dataset partition (default 20)",
+        default=5,
+        help="number of root files to include in each dataset partition (default 7)",
     )
     parser.add_argument(
         "--label",
@@ -145,13 +145,34 @@ if __name__ == "__main__":
         action="store_true",
         help="Enable saving outputs to /eos",
     )
+    parser.add_argument(
+        "--lepton_flavor",
+        dest="lepton_flavor",
+        type=str,
+        default="mu",
+        help="lepton flavor to be processed (mu)",
+    )
+    parser.add_argument(
+        "--channel",
+        dest="channel",
+        type=str,
+        default="1b1l",
+        help="channel to be processed (1b1l, 2b1l)",
+    )
+    parser.add_argument(
+        "--systematics",
+        action="store_true",
+        help="Enable applying jerc systematics",
+    )
     args = parser.parse_args()
 
     datasets = background_samples[args.processor] + data_samples[args.processor][args.year]
     for dataset in datasets:
-        cmd = f"python3 submit_condor.py --processor {args.processor} --year {args.year} --dataset {dataset} --label {args.label} --nfiles {args.nfiles}"
+        cmd = f"python3 submit_condor.py --processor {args.processor} --year {args.year} --dataset {dataset} --label {args.label} --nfiles {args.nfiles} --channel {args.channel} --lepton_flavor {args.lepton_flavor} --nfiles {args.nfiles} --flow"
         if args.submit:
             cmd += " --submit"
         if args.eos:
             cmd += " --eos"
+        if args.systematics:
+            cmd += " --systematics"
         os.system(cmd)
