@@ -98,7 +98,7 @@ class Postprocessor:
         group and accumulate output files by sample
         """
         logging.info(f"reading outputs from {self.output_dir}")
-        extension = ".pkl"
+        extension = ".coffea"
         output_files = glob.glob(f"{self.output_dir}/*{extension}", recursive=True)
         n_output_files = len(output_files)
         assert n_output_files != 0, "No output files found"

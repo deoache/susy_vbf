@@ -57,7 +57,7 @@ if __name__ == "__main__":
         default="2017",
         help="year of the data {2016preVFP, 2016postVFP, 2017, 2018} (default 2017)",
     )
-    arser.add_argument(
+    parser.add_argument(
         "--lepton_flavor",
         dest="lepton_flavor",
         type=str,

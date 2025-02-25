@@ -131,21 +131,21 @@ histogram_config:
         - 300
         - 500
       label: $p_T(\text{b-jets})$ [GeV]
-      expression: objects['bjets'].pt
+      expression: ak.pad_none(objects['bjets'], target=2)[:, 0].pt
     jet_eta:
       type: Regular
       bins: 50
       start: -2.4
       stop: 2.4
       label: $\eta(\text{b-jets})$
-      expression: objects['bjets'].eta
+      expression: ak.pad_none(objects['bjets'], target=2)[:, 0].eta
     jet_phi:
       type: Regular
       bins: 50
       start: -3.14159
       stop: 3.14159
       label: $\phi(\text{b-jets})$
-      expression: objects['bjets'].phi
+      expression: ak.pad_none(objects['bjets'], target=2)[:, 0].phi
     met:
       type: Variable
       edges:

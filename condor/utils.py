@@ -35,6 +35,8 @@ def get_command(args: dict) -> str:
             elif arg == "partition_fileset":
                 partition_fileset = args["partition_fileset"]
                 cmd += f" --partition_fileset '{json.dumps(partition_fileset)}' "
+            elif arg in ["flow", "systematics"]:
+                cmd += f" --{arg}"
             else:
                 cmd += f" --{arg} {args[arg]}"
     return cmd
