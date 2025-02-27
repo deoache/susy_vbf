@@ -14,6 +14,8 @@ def main(args):
 
     # get datasets key names
     main_dir = Path.cwd()
+    print(f'{main_dir=}')
+    print(f"{output_dir}")
     fileset_path = Path(f"{main_dir}/analysis/filesets")
     with open(f"{fileset_path}/{args.year}_fileset.yaml", "r") as f:
         datasets = yaml.safe_load(f)
@@ -21,9 +23,9 @@ def main(args):
     # get jobs done
     jobs_done = []
     for sample in datasets:
-        output_list = glob.glob(f"{output_dir}/{sample}*.pkl")
+        output_list = glob.glob(f"{output_dir}/{sample}*.coffea")
         for output in output_list:
-            jobs_done.append(output.split("/")[-1].replace(".pkl", ""))
+            jobs_done.append(output.split("/")[-1].replace(".coffea", ""))
     n_jobs_done = len(jobs_done)
 
     # get jobs to be run
