@@ -118,7 +118,6 @@ class HistogramConfig:
             if True histograms will include a StrCategory axis for systematics
         add_weight:
             if True hist.storage.Weight() will be added to the histograms
-
     """
 
     axes: Dict[str, Any]
