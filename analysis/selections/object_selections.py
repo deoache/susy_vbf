@@ -15,24 +15,28 @@ def delta_r_mask(first, second, threshold=0.4):
 class ObjectSelector:
 
     def __init__(self, object_selection_config, year):
-        self.year = year
         self.object_selection_config = object_selection_config
+        self.year = year
 
     def select_objects(self, events):
         self.objects = {}
         self.events = events
+
         for obj_name, obj_config in self.object_selection_config.items():
-            # check if object field is read from events or from user defined function
+            # check if object is defined from events or user defined function
             if "events" in obj_config["field"]:
                 self.objects[obj_name] = eval(obj_config["field"])
             else:
                 selection_function = getattr(self, obj_config["field"])
-                parameters = inspect.signature(selection_function).parameters.keys()
-                if "cuts" in parameters:
-                    selection_function(obj_config["cuts"])
-                    break
-                else:
-                    selection_function()
+                selection_function()
+            if "add_cut" in obj_config:
+                for field_to_add in obj_config["add_cut"]:
+                    selection_mask = self.get_selection_mask(
+                        events=events,
+                        obj_name=obj_name,
+                        cuts=obj_config["add_cut"][field_to_add],
+                    )
+                    self.objects[obj_name][field_to_add] = selection_mask
             if "cuts" in obj_config:
                 selection_mask = self.get_selection_mask(
                     events=events, obj_name=obj_name, cuts=obj_config["cuts"]
@@ -41,40 +45,14 @@ class ObjectSelector:
         return self.objects
 
     def get_selection_mask(self, events, obj_name, cuts):
-        # bring 'objects' and to local scope
+        # bring objects and year to local scope
         objects = self.objects
+        year = self.year
         # initialize selection mask
         selection_mask = ak.ones_like(self.objects[obj_name].pt, dtype=bool)
         # iterate over all cuts
-        for selection, str_mask in cuts.items():
-            # cast 'str_mask' to str if needed
-            # for instance: 'taus_decaymode: 13'
-            if not isinstance(str_mask, str):
-                str_mask = str(str_mask)
-            # check if 'str_mask' contains 'events' or 'objects'
-            if "events" in str_mask or "objects" in str_mask:
-                # evaluate string expression for the mask
-                mask = eval(str_mask)
-            else:
-                # load working point function
-                wp_function = getattr(working_points, selection)
-                # get working point function parameters
-                signature = inspect.signature(wp_function)
-                parameters = signature.parameters.keys()
-                args_map = {
-                    "events": self.events,
-                    "wp": str_mask,
-                    "year": self.year,
-                }
-                args = {}
-                for param in parameters:
-                    if param in args_map:
-                        args[param] = args_map[param]
-                    else:
-                        args[param] = cuts[param]
-                # get mask from working point function
-                mask = wp_function(**args)
-            # update selection mask
+        for str_mask in cuts:
+            mask = eval(str_mask)
             selection_mask = np.logical_and(selection_mask, mask)
         return selection_mask
 
@@ -114,12 +92,14 @@ class ObjectSelector:
             behavior=vector.backends.awkward.behavior,
         )
         self.objects["met"] = met2D + muons2D
-        
+
     def select_max_mass_dijet(self):
-        self.objects["max_dijet_mass"] = ak.max(self.objects['dijets'].p4.mass, axis=1)
+        self.objects["max_dijet_mass"] = ak.max(self.objects["dijets"].p4.mass, axis=1)
 
     def select_max_mass_dijet_eta(self):
         dijets_idx = ak.local_index(self.objects["dijets"], axis=1)
-        max_mass_idx = ak.argmax(self.objects['dijets'].p4.mass, axis=1)
+        max_mass_idx = ak.argmax(self.objects["dijets"].p4.mass, axis=1)
         max_mass_dijet = self.objects["dijets"][max_mass_idx == dijets_idx]
-        self.objects["max_dijet_mass_eta"] = ak.firsts(np.abs(max_mass_dijet.j1.eta - max_mass_dijet.j2.eta))
+        self.objects["max_dijet_mass_eta"] = ak.firsts(
+            np.abs(max_mass_dijet.j1.eta - max_mass_dijet.j2.eta)
+        )

@@ -19,18 +19,30 @@ def get_metfilters_mask(events, year):
     return metfilters_mask
 
 
-def get_lumi_mask(events, goldenjson):
+def get_lumi_mask(events, year):
+    if year.startswith("2017"):
+        goldenjson = (
+            "analysis/data/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt"
+        )
+    elif year.startswith("2018"):
+        goldenjson = (
+            "analysis/data/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt"
+        )
+    elif year.startswith("2016"):
+        goldenjson = (
+            "analysis/data/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt"
+        )
     if hasattr(events, "genWeight"):
         lumi_mask = np.ones(len(events), dtype="bool")
     else:
         lumi_info = LumiMask(goldenjson)
         lumi_mask = lumi_info(events.run, events.luminosityBlock)
-    return lumi_mask
+    return lumi_mask == 1
 
 
 def get_trigger_mask(events, hlt_paths):
     trigger_mask = np.zeros(len(events), dtype="bool")
-    
+
     for hlt_path in hlt_paths:
         if hlt_path in events.HLT.fields:
             trigger_mask = trigger_mask | events.HLT[hlt_path]
@@ -56,35 +68,37 @@ def get_stitching_mask(events, dataset, dataset_key, ht_value):
     return stitching_mask
 
 
-def get_hemcleaning_mask(events):
+def get_hemcleaning_mask(events, year):
     # hem-cleaning selection
     # https://hypernews.cern.ch/HyperNews/CMS/get/JetMET/2000.html
     # Due to the HEM issue in year 2018, we veto the events with jets and electrons in the
     # region -3 < eta <-1.3 and -1.57 < phi < -0.87 to remove fake MET
-    hem_veto = ak.any(
-        (
-            (events.Jet.eta > -3.2)
-            & (events.Jet.eta < -1.3)
-            & (events.Jet.phi > -1.57)
-            & (events.Jet.phi < -0.87)
-        ),
-        -1,
-    ) | ak.any(
-        (
-            (events.Electron.pt > 30)
-            & (events.Electron.eta > -3.2)
-            & (events.Electron.eta < -1.3)
-            & (events.Electron.phi > -1.57)
-            & (events.Electron.phi < -0.87)
-        ),
-        -1,
-    )
-    hem_cleaning = (
-        (
-            (events.run >= 319077) & (not hasattr(events, "genWeight"))
-        )  # if data check if in Runs C or D
-        # else for MC randomly cut based on lumi fraction of C&D
-        | ((np.random.rand(len(events)) < 0.632) & hasattr(events, "genWeight"))
-    ) & (hem_veto)
+    if year == "2018":
+        hem_veto = ak.any(
+            (
+                (events.Jet.eta > -3.2)
+                & (events.Jet.eta < -1.3)
+                & (events.Jet.phi > -1.57)
+                & (events.Jet.phi < -0.87)
+            ),
+            -1,
+        ) | ak.any(
+            (
+                (events.Electron.pt > 30)
+                & (events.Electron.eta > -3.2)
+                & (events.Electron.eta < -1.3)
+                & (events.Electron.phi > -1.57)
+                & (events.Electron.phi < -0.87)
+            ),
+            -1,
+        )
+        hem_cleaning = (
+            (
+                (events.run >= 319077) & (not hasattr(events, "genWeight"))
+            )  # if data check if in Runs C or D
+            # else for MC randomly cut based on lumi fraction of C&D
+            | ((np.random.rand(len(events)) < 0.632) & hasattr(events, "genWeight"))
+        ) & (hem_veto)
 
-    return ~hem_cleaning           
+        return ~hem_cleaning
+    return np.ones(len(events), dtype=bool)
