@@ -4,20 +4,20 @@ import argparse
 from coffea import processor
 from coffea.util import save
 from humanfriendly import format_timespan
-from analysis.processors.ztojets import ZToJets
+from analysis.processors.base import BaseProcessor
 
 
 def main(args):
-    processors = {
-        "ztojets": ZToJets(
-            year=args.year, flow=eval(args.flow), do_systematics=args.do_systematics
-        ),
-    }
     t0 = time.monotonic()
     out = processor.run_uproot_job(
         args.partition_fileset,
         treename="Events",
-        processor_instance=processors[args.processor],
+        processor_instance=BaseProcessor(
+            processor=args.processor,
+            year=args.year,
+            flow=eval(args.flow),
+            do_systematics=args.do_systematics,
+        ),
         executor=processor.futures_executor,
         executor_args={"schema": processor.NanoAODSchema, "workers": 4},
     )
