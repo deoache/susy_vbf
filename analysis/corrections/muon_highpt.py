@@ -75,7 +75,7 @@ class MuonHighPtCorrector:
         iso_wp: str = "tight",
     ) -> None:
         self.events = events
-        self.muons = events.Muon
+        self.muons = events.selected_muons
         self.variation = variation
         self.id_wp = id_wp
         self.iso_wp = iso_wp

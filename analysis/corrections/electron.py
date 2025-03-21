@@ -28,8 +28,8 @@ class ElectronCorrector:
 
     Parameters:
     -----------
-    electrons:
-        electron collection
+    events:
+        events collection
     hlt:
         high level trigger branch
     weights:
@@ -43,17 +43,18 @@ class ElectronCorrector:
 
     def __init__(
         self,
-        electrons: ak.Array,
+        events: ak.Array,
         weights: Type[Weights],
         year: str = "2017",
         variation: str = "nominal",
     ) -> None:
-        self.electrons = electrons
+        self.electrons = events.selected_electrons
         self.variation = variation
-        self.nevents = len(electrons)
 
         # flat electrons array
-        self.e, self.n = ak.flatten(electrons), ak.num(electrons)
+        self.e, self.n = ak.flatten(events.selected_electrons), ak.num(
+            events.selected_electrons
+        )
 
         # weights container
         self.weights = weights
@@ -178,28 +179,25 @@ class ElectronCorrector:
     def add_reco_weight(self, reco: str) -> None:
         """
         add electron reconstruction scale factors to weights container
-        
+
         reco: {RecoAbove20, RecoBelow20}
         """
         electron_pt_mask = {
             "RecoAbove20": (self.e.pt > 20) & (self.e.pt < 499.999),
-            "RecoBelow20":  (self.e.pt > 10) & (self.e.pt < 20)
+            "RecoBelow20": (self.e.pt > 10) & (self.e.pt < 20),
         }
         # get 'in-limits' electrons
         in_electron_mask = electron_pt_mask[reco]
         in_electrons = self.e.mask[in_electron_mask]
-        
+
         # get electrons transverse momentum and pseudorapidity (replace None values with some 'in-limit' value)
-        electrons_pt_limits = {
-            "RecoAbove20": 21,
-            "RecoBelow20": 15
-        }
+        electrons_pt_limits = {"RecoAbove20": 21, "RecoBelow20": 15}
         electron_pt = ak.fill_none(in_electrons.pt, electrons_pt_limits[reco])
         electron_eta = ak.fill_none(in_electrons.eta, 0.0)
-        
+
         # remove _UL from year
         year = self.pog_year.replace("_UL", "")
-        
+
         # get nominal scale factors
         nominal_sf = unflat_sf(
             self.cset["UL-Electron-ID-SF"].evaluate(

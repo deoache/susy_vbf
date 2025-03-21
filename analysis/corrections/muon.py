@@ -10,7 +10,6 @@ from analysis.selections import trigger_match
 from analysis.corrections.utils import pog_years, get_pog_json
 
 
-
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2016
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2017
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
@@ -75,7 +74,7 @@ class MuonCorrector:
         iso_wp: str = "tight",
     ) -> None:
         self.events = events
-        self.muons = events.Muon
+        self.muons = events.selected_muons
         self.variation = variation
         self.id_wp = id_wp
         self.iso_wp = iso_wp

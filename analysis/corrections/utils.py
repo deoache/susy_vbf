@@ -177,7 +177,8 @@ def get_era(input_str):
         or input_str.startswith("MET")
     ):
         match = re.search(
-            r"SingleMuon([A-Za-z])|SingleElectron([A-Za-z])|Tau([A-Za-z])|MET([A-Za-z])", input_str
+            r"SingleMuon([A-Za-z])|SingleElectron([A-Za-z])|Tau([A-Za-z])|MET([A-Za-z])",
+            input_str,
         )
         if match:
             # Return the first matched group (the letter following "Muon" or "EGamma")

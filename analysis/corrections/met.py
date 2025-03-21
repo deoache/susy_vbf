@@ -8,7 +8,6 @@ from analysis.corrections.jetvetomaps import jetvetomaps_mask
 
 def apply_met_phi_corrections(
     events: ak.Array,
-    is_mc: bool,
     year: str,
 ) -> Tuple[ak.Array, ak.Array]:
     """
@@ -18,8 +17,6 @@ def apply_met_phi_corrections(
     -----------
         events:
             Events array
-        is_mc:
-            True if dataset is MC
         year:
             Year of the dataset  {'2016preVFP', '2016postVFP', '2017', '2018'}
 
@@ -46,7 +43,7 @@ def apply_met_phi_corrections(
         "2017": [297020, 306463],
         "2018": [315252, 325274],
     }
-    data_kind = "mc" if is_mc else "data"
+    data_kind = "mc" if hasattr(events, "genWeight") else "data"
     if data_kind == "mc":
         run = np.random.randint(
             run_ranges[year][0], run_ranges[year][1], size=len(met_pt)
@@ -64,19 +61,32 @@ def apply_met_phi_corrections(
         pass
 
 
-def corrected_polar_met(met_pt, met_phi, other_phi, other_pt_old, other_pt_new, positive=None, dx=None, dy=None) -> tuple:
+def corrected_polar_met(
+    met_pt,
+    met_phi,
+    other_phi,
+    other_pt_old,
+    other_pt_new,
+    positive=None,
+    dx=None,
+    dy=None,
+) -> tuple:
     """
     helper function to compute new MET polar components after some other object pT correction.
-    
+
     https://github.com/CoffeaTeam/coffea/blob/master/src/coffea/jetmet_tools/CorrectedMETFactory.py#L6
     """
     sin, cos = np.sin(other_phi), np.cos(other_phi)
-    met_px = met_pt * np.cos(met_phi) + ak.sum((other_pt_new - other_pt_old) * cos, axis=1)
-    met_py = met_pt * np.sin(met_phi) + ak.sum((other_pt_new - other_pt_old) * sin, axis=1)
+    met_px = met_pt * np.cos(met_phi) + ak.sum(
+        (other_pt_new - other_pt_old) * cos, axis=1
+    )
+    met_py = met_pt * np.sin(met_phi) + ak.sum(
+        (other_pt_new - other_pt_old) * sin, axis=1
+    )
     if positive is not None and dx is not None and dy is not None:
         met_px = met_px + dx if positive else x - dx
         met_py = met_py + dy if positive else y - dy
-    
+
     corrected_met_pt = np.hypot(met_px, met_py)
     corrected_met_phi = np.arctan2(met_py, met_px)
     return corrected_met_pt, corrected_met_phi

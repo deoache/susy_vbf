@@ -8,7 +8,7 @@ from analysis.corrections.utils import get_pog_json
 
 
 def add_pujetid_weight(
-    jets: ak.Array,
+    events: ak.Array,
     weights: Type[Weights],
     year: str = "2017",
     working_point: str = "tight",
@@ -19,8 +19,8 @@ def add_pujetid_weight(
 
     Parameters:
     -----------
-        jets:
-            Jet collection
+        events:
+            events collection
         weights:
             Weights object from coffea.analysis_tools
         year:
@@ -56,6 +56,7 @@ def add_pujetid_weight(
     wp_map = {"tight": "T", "medium": "M", "loose": "L"}
 
     # flat jets array since correction function works only on flat arrays
+    jets = events.selected_jets
     j, n = ak.flatten(jets), ak.num(jets)
 
     # get 'in-limits' jets

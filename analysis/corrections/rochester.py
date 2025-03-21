@@ -5,7 +5,7 @@ from coffea.lookup_tools import txt_converters, rochester_lookup
 
 
 def apply_rochester_corrections(
-    events: ak.Array, is_mc: bool, year: str = "2017", variation: str = "nominal"
+    events: ak.Array, year: str = "2017", variation: str = "nominal"
 ):
     # https://twiki.cern.ch/twiki/bin/viewauth/CMS/RochcorMuon
     rochester_data = txt_converters.convert_rochester_file(
@@ -16,7 +16,7 @@ def apply_rochester_corrections(
     # define muon pt_raw field
     events["Muon", "pt_raw"] = ak.ones_like(events.Muon.pt) * events.Muon.pt
 
-    if is_mc:
+    if hasattr(events, "genWeight"):
         hasgen = ~np.isnan(ak.fill_none(events.Muon.matched_gen.pt, np.nan))
         mc_rand = np.random.rand(*ak.to_numpy(ak.flatten(events.Muon.pt)).shape)
         mc_rand = ak.unflatten(mc_rand, ak.num(events.Muon.pt, axis=1))
