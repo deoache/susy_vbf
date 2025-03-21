@@ -3,7 +3,6 @@ import inspect
 import numpy as np
 import awkward as ak
 from analysis.working_points import working_points
-from analysis.corrections.jetvetomaps import jetvetomaps_mask
 
 
 def delta_r_mask(first, second, threshold=0.4):

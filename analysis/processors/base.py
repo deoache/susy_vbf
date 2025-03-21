@@ -17,6 +17,7 @@ from analysis.selections import (
     get_stitching_mask,
     get_hemcleaning_mask,
 )
+from analysis.corrections.jetvetomaps import apply_jetvetomaps
 
 
 def update(events, collections):
@@ -117,6 +118,10 @@ class BaseProcessor(processor.ProcessorABC):
         # -------------------------------------------------------------
         # object selection
         # -------------------------------------------------------------
+        if "jets_veto" in self.processor_config.corrections_config["objects"]:
+            # apply jet veto maps and update MET field
+            apply_jetvetomaps(events, year)
+            
         object_selector = ObjectSelector(object_selection, year)
         objects = object_selector.select_objects(events)
 

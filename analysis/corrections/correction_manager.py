@@ -8,7 +8,6 @@ from analysis.corrections import (
     MuonHighPtCorrector,
     add_pileup_weight,
     add_pujetid_weight,
-    update_met_jet_veto,
     apply_jet_corrections,
     add_l1prefiring_weight,
     apply_met_phi_corrections,
@@ -38,9 +37,6 @@ def object_corrector_manager(events, year, processor_config, variation="nominal"
             events=events,
             year=year,
         )
-    # propagate jet_veto maps to MET
-    if "jetsvetomaps" in objcorr_config:
-        update_met_jet_veto(events, year)
 
 
 def weight_manager(pruned_ev, year, processor_config, variation="nominal"):

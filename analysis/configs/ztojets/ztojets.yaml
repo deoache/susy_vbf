@@ -134,7 +134,7 @@ corrections:
     - muons
     - taus
     - met
-    - jetsvetomaps
+    - jets_veto
   event_weights:
     genWeight: true
     pileupWeight: true
