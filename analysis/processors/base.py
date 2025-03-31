@@ -46,14 +46,14 @@ class BaseProcessor(processor.ProcessorABC):
         self.histograms = HistBuilder(self.processor_config).build_histogram()
 
     def process(self, events):
+        # correct objects
+        object_corrector_manager(events, self.year, self.processor_config, "nominal")
+        
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
         if not self.is_mc:
             # nominal JEC are already applied in data
             return self.process_shift(events, shift_name="nominal")
-
-        # object corrections
-        object_corrector_manager(events, self.year, self.processor_config, "nominal")
 
         # define Jet/MET shifts
         shifts = [({"Jet": events.Jet, "MET": events.MET}, "nominal")]
