@@ -10,11 +10,7 @@ DATA_SAMPLES = {
         "SingleMuonE",
         "SingleMuonF",
     ],
-    "2016postVFP": [
-        "SingleMuonF", 
-        "SingleMuonG", 
-        "SingleMuonH"
-    ],
+    "2016postVFP": ["SingleMuonF", "SingleMuonG", "SingleMuonH"],
     "2017": [
         "SingleMuonB",
         "SingleMuonC",
@@ -22,15 +18,10 @@ DATA_SAMPLES = {
         "SingleMuonE",
         "SingleMuonF",
     ],
-    "2018": [
-        "SingleMuonA", 
-        "SingleMuonB", 
-        "SingleMuonC", 
-        "SingleMuonD"
-    ]
+    "2018": ["SingleMuonA", "SingleMuonB", "SingleMuonC", "SingleMuonD"],
 }
-MC_SAMPLES = [
-    "ztojets": {
+MC_SAMPLES = {
+    "ztojets": [
         # DYJetsToLL
         "DYJetsToLL_M-4to50_HT-100to200",
         "DYJetsToLL_M-4to50_HT-200to400",
@@ -78,8 +69,8 @@ MC_SAMPLES = [
         "WW",
         "WZ",
         "ZZ",
-    },
-    "ztomumu": {
+    ],
+    "ztomumu": [
         # DYJetsToLL
         "DYJetsToLL_inclusive_10to50",
         "DYJetsToLL_inclusive_50",
@@ -106,8 +97,8 @@ MC_SAMPLES = [
         "WW",
         "WZ",
         "ZZ",
-    },
-]
+    ],
+}
 
 
 def main(args):
@@ -121,8 +112,7 @@ def main(args):
         if args.do_systematics:
             cmd += " --do_systematics"
         os.system(cmd)
-    
-    
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
