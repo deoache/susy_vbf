@@ -15,35 +15,6 @@ from analysis.corrections.utils import pog_years, get_pog_json
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2018
 
 
-def get_id_wps(muons):
-    return {
-        # cutbased ID working points
-        "loose": muons.looseId,
-        "medium": muons.mediumId,
-        "tight": muons.tightId,
-    }
-
-
-def get_iso_wps(muons):
-    return {
-        "loose": (
-            muons.pfRelIso04_all < 0.25
-            if hasattr(muons, "pfRelIso04_all")
-            else muons.pfRelIso03_all < 0.25
-        ),
-        "medium": (
-            muons.pfRelIso04_all < 0.20
-            if hasattr(muons, "pfRelIso04_all")
-            else muons.pfRelIso03_all < 0.20
-        ),
-        "tight": (
-            muons.pfRelIso04_all < 0.15
-            if hasattr(muons, "pfRelIso04_all")
-            else muons.pfRelIso03_all < 0.15
-        ),
-    }
-
-
 class MuonCorrector:
     """
     Muon corrector class
@@ -157,8 +128,7 @@ class MuonCorrector:
         # get muons that pass the id wp, and within SF binning
         muon_pt_mask = (self.m.pt > 15.0) & (self.m.pt < 199.999)
         muon_eta_mask = np.abs(self.m.eta) < 2.39
-        muon_id_mask = get_id_wps(self.m)[self.id_wp]
-        in_muon_mask = muon_pt_mask & muon_eta_mask & muon_id_mask
+        in_muon_mask = muon_pt_mask & muon_eta_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons pT and abseta (replace None values with some 'in-limit' value)
@@ -233,9 +203,7 @@ class MuonCorrector:
         # get 'in-limits' muons
         muon_pt_mask = self.m.pt > 29.0
         muon_eta_mask = np.abs(self.m.eta) < 2.39
-        muon_id_mask = get_id_wps(self.m)[self.id_wp]
-        muon_iso_mask = get_iso_wps(self.m)[self.iso_wp]
-        in_muon_mask = muon_pt_mask & muon_eta_mask & muon_id_mask & muon_iso_mask
+        in_muon_mask = muon_pt_mask & muon_eta_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons pT and abseta (replace None values with some 'in-limit' value)
@@ -347,51 +315,19 @@ class MuonCorrector:
                 weight=nominal_sf,
             )
 
-    def add_triggeriso_weight(self, hlt_paths) -> None:
+    def add_triggeriso_weight(self) -> None:
         """
         add muon Trigger Iso (IsoMu24 or IsoMu27) weights
-
-        trigger_mask:
-            mask array of events passing the analysis trigger
-        trigger_match_mask:
-            mask array of DeltaR matched trigger objects
         """
         assert (
             self.id_wp == "tight" and self.iso_wp == "tight"
         ), "there's only available muon trigger SF for 'tight' ID and Iso"
 
-        trigger_match_mask = np.zeros(len(self.events), dtype="bool")
-        for hlt_path in hlt_paths:
-            trig_match = trigger_match(
-                leptons=self.muons,
-                trigobjs=self.events.TrigObj,
-                trigger_path=hlt_path,
-            )
-            trigger_match_mask = trigger_match_mask | trig_match
-
-        trigger_mask = np.zeros(len(self.events), dtype="bool")
-
-        for hlt_path in hlt_paths:
-            if hlt_path in self.events.HLT.fields:
-                trigger_mask = trigger_mask | self.events.HLT[hlt_path]
-
         # get 'in-limits' muons
         muon_pt_mask = (self.m.pt > 29.0) & (self.m.pt < 199.999)
         muon_eta_mask = np.abs(self.m.eta) < 2.399
-        muon_id_mask = get_id_wps(self.m)[self.id_wp]
-        muon_iso_mask = get_iso_wps(self.m)[self.iso_wp]
 
-        trigger_mask = ak.flatten(ak.ones_like(self.muons.pt) * trigger_mask) > 0
-        trigger_match_mask = ak.flatten(trigger_match_mask)
-
-        in_muon_mask = (
-            muon_pt_mask
-            & muon_eta_mask
-            & muon_id_mask
-            & muon_iso_mask
-            & trigger_mask
-            & trigger_match_mask
-        )
+        in_muon_mask = muon_pt_mask & muon_eta_mask
         in_muons = self.m.mask[in_muon_mask]
 
         # get muons transverse momentum and abs pseudorapidity (replace None values with some 'in-limit' value)
@@ -407,27 +343,24 @@ class MuonCorrector:
         }
         # get nominal scale factors
         sf = self.cset[sfs_keys[self.year]].evaluate(muon_eta, muon_pt, "nominal")
-        nominal_sf = unflat_sf(
-            sf,
-            in_muon_mask,
-            self.n,
-        )
+        sf = ak.where(in_muon_mask, sf, ak.ones_like(sf))
+        sf = ak.fill_none(ak.unflatten(sf, self.n), value=1)
+        nominal_sf = ak.firsts(sf)
+
         if self.variation == "nominal":
             # get 'up' and 'down' scale factors
             up_sf = self.cset[sfs_keys[self.year]].evaluate(muon_eta, muon_pt, "systup")
-            up_sf = unflat_sf(
-                up_sf,
-                in_muon_mask,
-                self.n,
-            )
+            up_sf = ak.where(in_muon_mask, up_sf, ak.ones_like(up_sf))
+            up_sf = ak.fill_none(ak.unflatten(up_sf, self.n), value=1)
+            up_sf = ak.firsts(up_sf)
+
             down_sf = self.cset[sfs_keys[self.year]].evaluate(
                 muon_eta, muon_pt, "systdown"
             )
-            down_sf = unflat_sf(
-                down_sf,
-                in_muon_mask,
-                self.n,
-            )
+            down_sf = ak.where(in_muon_mask, down_sf, ak.ones_like(down_sf))
+            down_sf = ak.fill_none(ak.unflatten(down_sf, self.n), value=1)
+            down_sf = ak.firsts(down_sf)
+
             # add scale factors to weights container
             self.weights.add(
                 name=f"muon_triggeriso",
