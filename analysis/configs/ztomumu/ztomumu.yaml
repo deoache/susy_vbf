@@ -52,9 +52,10 @@ event_selection:
     trigger: get_trigger_mask(events, hlt_paths)
     trigger_match: get_trigger_match_mask(events, hlt_paths)
     w_stitching: get_stitching_mask(events, dataset, 'WJetsToLNu_inclusive', 100)
+    dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
     two_muons: ak.num(objects['muons']) == 2
-    first_muon_pt: ak.firsts(objects['muons'].pt) > 27
-    second_muon_pt: ak.pad_none(objects['muons'], target=2)[:, 1].pt > 15
+    first_muon_pt: ak.firsts(objects['muons'].pt) > 30
+    second_muon_pt: ak.pad_none(objects['muons'], target=2)[:, 1].pt > 27
     one_dimuon: ak.num(objects['dimuons']) == 1
     electron_veto: ak.num(objects['electrons']) == 0
     tau_veto: ak.num(objects['taus']) == 0
@@ -64,6 +65,7 @@ event_selection:
       - lumi
       - trigger
       - trigger_match
+      - dy_stitching
       - w_stitching
       - two_muons
       - first_muon_pt
