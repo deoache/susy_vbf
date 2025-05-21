@@ -7,7 +7,7 @@ from pathlib import Path
 from .utils import unflat_sf
 from coffea.analysis_tools import Weights
 from analysis.selections import trigger_match
-from analysis.corrections.utils import pog_years, get_pog_json
+from analysis.corrections.utils import pog_years, get_pog_json, get_muon_hlt_json
 
 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonUL2016
@@ -341,33 +341,80 @@ class MuonCorrector:
             "2017": "NUM_IsoMu27_DEN_CutBasedIdTight_and_PFIsoTight",
             "2018": "NUM_IsoMu24_DEN_CutBasedIdTight_and_PFIsoTight",
         }
-        # get nominal scale factors
-        sf = self.cset[sfs_keys[self.year]].evaluate(muon_eta, muon_pt, "nominal")
-        sf = ak.where(in_muon_mask, sf, ak.ones_like(sf))
-        sf = ak.fill_none(ak.unflatten(sf, self.n), value=1)
-        nominal_sf = ak.firsts(sf)
+
+        kind = "single" if ak.all(ak.num(self.muons) == 1) else "double"
+        if kind == "single":
+
+            # for single muon events, compute SF from POG SF
+            sf = self.cset[sfs_keys[self.year]].evaluate(muon_eta, muon_pt, "nominal")
+            nominal_sf = unflat_sf(
+                sf,
+                in_muon_mask,
+                self.n,
+            )
+
+        elif kind == "double":
+
+            # for double muon events, compute SF from muons' efficiencies
+            double_cset = correctionlib.CorrectionSet.from_file(
+                get_muon_hlt_json(year=self.year)
+            )
+
+            data_eff = double_cset["Muon-HLT-DataEff"].evaluate(
+                self.variation,
+                sfs_keys[self.year],
+                muon_eta,
+                muon_pt,
+            )
+            data_eff = ak.where(in_muon_mask, data_eff, ak.ones_like(data_eff))
+            data_eff = ak.unflatten(data_eff, self.n)
+            data_eff_1 = ak.firsts(data_eff)
+            data_eff_2 = ak.pad_none(data_eff, target=2)[:, 1]
+            full_data_eff = data_eff_1 + data_eff_2 - data_eff_1 * data_eff_2
+
+            mc_eff = double_cset["Muon-HLT-McEff"].evaluate(
+                self.variation,
+                sfs_keys[self.year],
+                muon_eta,
+                muon_pt,
+            )
+            mc_eff = ak.where(in_muon_mask, mc_eff, ak.ones_like(mc_eff))
+            mc_eff = ak.unflatten(mc_eff, self.n)
+            mc_eff_1 = ak.firsts(mc_eff)
+            mc_eff_2 = ak.pad_none(mc_eff, target=2)[:, 1]
+            full_mc_eff = mc_eff_1 + mc_eff_2 - mc_eff_1 * mc_eff_2
+
+            nominal_sf = full_data_eff / full_mc_eff
 
         if self.variation == "nominal":
             # get 'up' and 'down' scale factors
-            up_sf = self.cset[sfs_keys[self.year]].evaluate(muon_eta, muon_pt, "systup")
-            up_sf = ak.where(in_muon_mask, up_sf, ak.ones_like(up_sf))
-            up_sf = ak.fill_none(ak.unflatten(up_sf, self.n), value=1)
-            up_sf = ak.firsts(up_sf)
+            if kind == "single":
+                up_sf = self.cset[sfs_keys[self.year]].evaluate(
+                    muon_eta, muon_pt, "systup"
+                )
+                up_sf = ak.where(in_muon_mask, up_sf, ak.ones_like(up_sf))
+                up_sf = ak.fill_none(ak.unflatten(up_sf, self.n), value=1)
+                up_sf = ak.firsts(up_sf)
 
-            down_sf = self.cset[sfs_keys[self.year]].evaluate(
-                muon_eta, muon_pt, "systdown"
-            )
-            down_sf = ak.where(in_muon_mask, down_sf, ak.ones_like(down_sf))
-            down_sf = ak.fill_none(ak.unflatten(down_sf, self.n), value=1)
-            down_sf = ak.firsts(down_sf)
+                down_sf = self.cset[sfs_keys[self.year]].evaluate(
+                    muon_eta, muon_pt, "systdown"
+                )
+                down_sf = ak.where(in_muon_mask, down_sf, ak.ones_like(down_sf))
+                down_sf = ak.fill_none(ak.unflatten(down_sf, self.n), value=1)
+                down_sf = ak.firsts(down_sf)
 
-            # add scale factors to weights container
-            self.weights.add(
-                name=f"muon_triggeriso",
-                weight=nominal_sf,
-                weightUp=up_sf,
-                weightDown=down_sf,
-            )
+                # add scale factors to weights container
+                self.weights.add(
+                    name=f"muon_triggeriso",
+                    weight=nominal_sf,
+                    weightUp=up_sf,
+                    weightDown=down_sf,
+                )
+            elif kind == "double":
+                self.weights.add(
+                    name=f"muon_triggeriso",
+                    weight=nominal_sf,
+                )
         else:
             self.weights.add(
                 name=f"muon_triggeriso",
