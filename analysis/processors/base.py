@@ -1,4 +1,5 @@
 import copy
+import numpy as np
 import awkward as ak
 from coffea import processor
 from coffea.analysis_tools import PackedSelection, Weights
@@ -48,7 +49,7 @@ class BaseProcessor(processor.ProcessorABC):
     def process(self, events):
         # correct objects
         object_corrector_manager(events, self.year, self.processor_config, "nominal")
-
+        
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
         if not self.is_mc:
@@ -121,7 +122,7 @@ class BaseProcessor(processor.ProcessorABC):
         if "jets_veto" in self.processor_config.corrections_config["objects"]:
             # apply jet veto maps and update MET field
             apply_jetvetomaps(events, year)
-
+            
         object_selector = ObjectSelector(object_selection, year)
         objects = object_selector.select_objects(events)
 
