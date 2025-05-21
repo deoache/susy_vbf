@@ -48,7 +48,7 @@ class BaseProcessor(processor.ProcessorABC):
     def process(self, events):
         # correct objects
         object_corrector_manager(events, self.year, self.processor_config, "nominal")
-        
+
         # check if sample is MC
         self.is_mc = hasattr(events, "genWeight")
         if not self.is_mc:
@@ -121,7 +121,7 @@ class BaseProcessor(processor.ProcessorABC):
         if "jets_veto" in self.processor_config.corrections_config["objects"]:
             # apply jet veto maps and update MET field
             apply_jetvetomaps(events, year)
-            
+
         object_selector = ObjectSelector(object_selection, year)
         objects = object_selector.select_objects(events)
 
@@ -155,13 +155,24 @@ class BaseProcessor(processor.ProcessorABC):
 
                 if shift_name == "nominal":
                     # save cutflow to metadata
-                    output["metadata"][category] = {"cutflow": {"initial": len(events)}}
+                    output["metadata"][category] = {"cutflow": {"initial": sumw}}
                     selections = []
                     for cut_name in category_cuts:
                         selections.append(cut_name)
                         current_selection = selection_manager.all(*selections)
+                        pruned_ev_cutflow = events[current_selection]
+                        for obj in objects:
+                            pruned_ev_cutflow[f"selected_{obj}"] = objects[obj][
+                                current_selection
+                            ]
+                        weights_container_cutflow = weight_manager(
+                            pruned_ev_cutflow,
+                            year,
+                            self.processor_config,
+                            variation="nominal",
+                        )
                         output["metadata"][category]["cutflow"][cut_name] = ak.sum(
-                            current_selection
+                            weights_container_cutflow.weight()
                         )
                     # save number of events after selection to metadata
                     weighted_final_nevents = ak.sum(weights_container.weight())
