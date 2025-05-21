@@ -35,7 +35,6 @@ MC_SAMPLES = {
         "DYJetsToLL_M-50_HT-600to800",
         "DYJetsToLL_M-50_HT-70to100",
         "DYJetsToLL_M-50_HT-800to1200",
-        "DYJetsToLL_inclusive_10to50",
         "DYJetsToLL_inclusive_50",
         # EWK
         "EWKWMinus2Jets_WToLNu",
@@ -72,7 +71,18 @@ MC_SAMPLES = {
     ],
     "ztomumu": [
         # DYJetsToLL
-        "DYJetsToLL_inclusive_10to50",
+        "DYJetsToLL_M-4to50_HT-100to200",
+        "DYJetsToLL_M-4to50_HT-200to400",
+        "DYJetsToLL_M-4to50_HT-400to600",
+        "DYJetsToLL_M-4to50_HT-600toInf",
+        "DYJetsToLL_M-50_HT-100to200",
+        "DYJetsToLL_M-50_HT-1200to2500",
+        "DYJetsToLL_M-50_HT-200to400",
+        "DYJetsToLL_M-50_HT-2500toInf",
+        "DYJetsToLL_M-50_HT-400to600",
+        "DYJetsToLL_M-50_HT-600to800",
+        "DYJetsToLL_M-50_HT-70to100",
+        "DYJetsToLL_M-50_HT-800to1200",
         "DYJetsToLL_inclusive_50",
         # SingleTop
         "ST_s-channel_4f_leptonDecays",
