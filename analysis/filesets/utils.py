@@ -28,3 +28,11 @@ def divide_list(lst: list, nfiles) -> list:
         start = end
 
     return result
+
+
+def get_dataset_key(dataset):
+    datasets = ["SingleMuon", "SingleElectron"]
+    for dataset_key in datasets:
+        if dataset.startswith(dataset_key):
+            return dataset_key
+    return "MC"
