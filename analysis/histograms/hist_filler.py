@@ -21,7 +21,7 @@ def get_flow_array(histogram, variable, variables_map):
 
 
 def get_variable_array(histogram, histogram_config, variable, variables_map, flow):
-    if histogram_config.axes[variable].type == "IntCategory":
+    if histogram_config.axes[variable].type in ["IntCategory", "Integer"]:
         # cast to integer array
         variable_array = normalize(variables_map[variable])
         variable_array = ak.to_numpy(variable_array).astype(int)
@@ -55,10 +55,9 @@ def fill_histogram(
             if histogram_config.add_syst_axis:
                 fill_args.update({"variation": variation})
             if histogram_config.add_weight:
-                weights = fill_kwargs["weights"]
                 fill_args.update(
                     {
-                        "weights": (
+                        "weight": (
                             ak.flatten(ak.ones_like(variables_map[variable]) * weights)
                             if variables_map[variable].ndim == 2
                             else weights
@@ -99,12 +98,12 @@ def fill_histograms(
     histogram_config,
     variables_map,
     category,
-    variation,
+    shift_name,
     flow,
     is_mc,
     weights_container,
 ):
-    if is_mc:
+    if is_mc and (shift_name == "nominal"):
         variations = ["nominal"] + list(weights_container.variations)
         for variation in variations:
             if variation == "nominal":
@@ -120,14 +119,25 @@ def fill_histograms(
                 category=category,
                 flow=True,
             )
-    else:
+    elif is_mc and (shift_name != "nominal"):
         region_weight = weights_container.weight()
         fill_histogram(
             histograms=histograms,
             histogram_config=histogram_config,
             variables_map=variables_map,
             weights=region_weight,
-            variation="nominal",
+            variation=shift_name,
+            category=category,
+            flow=True,
+        )
+    elif not is_mc and (shift_name == "nominal"):
+        region_weight = weights_container.weight()
+        fill_histogram(
+            histograms=histograms,
+            histogram_config=histogram_config,
+            variables_map=variables_map,
+            weights=region_weight,
+            variation=shift_name,
             category=category,
             flow=True,
         )

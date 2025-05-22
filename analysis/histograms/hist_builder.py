@@ -1,15 +1,15 @@
 import hist
 
-
 class HistBuilder:
-    def __init__(self, processor_config):
-        self.processor_config = processor_config
-        self.histogram_config = processor_config.histogram_config
+    def __init__(self, workflow_config):
+        self.workflow_config = workflow_config
+        self.histogram_config = workflow_config.histogram_config
         self.axis_opt = {
             "StrCategory": hist.axis.StrCategory,
             "IntCategory": hist.axis.IntCategory,
             "Regular": hist.axis.Regular,
             "Variable": hist.axis.Variable,
+            "Integer": hist.axis.Integer,
         }
         self.cat_axis = hist.axis.StrCategory(
             name="category", categories=self.histogram_config.categories
@@ -28,7 +28,7 @@ class HistBuilder:
         histograms = {}
         for axis in self.histogram_config.axes:
             axes = [self.build_axis(axis)]
-            if len(histogram_config.categories) > 1:
+            if len(self.histogram_config.categories) > 1:
                 axes.append(self.cat_axis)
             if self.histogram_config.add_syst_axis:
                 axes.append(self.get_syst_axis())
