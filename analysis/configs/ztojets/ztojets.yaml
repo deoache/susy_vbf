@@ -74,12 +74,13 @@ object_selection:
     field: select_max_mass_dijet_eta
 event_selection:
   hlt_paths:
-    - IsoMu27
+    SingleMuon:
+      - SingleMu
   selections:
     goodvertex: events.PV.npvsGood > 0
     lumi: get_lumi_mask(events, year)
-    trigger: get_trigger_mask(events, hlt_paths)
-    trigger_match: get_trigger_match_mask(events, hlt_paths)
+    trigger: get_trigger_mask(events, hlt_paths, dataset, year)
+    trigger_match: get_trigger_match_mask(events, hlt_paths, year, events.Muon)
     metfilters: get_metfilters_mask(events, year)
     hemcleaning: get_hemcleaning_mask(events, year)
     dy_stitching: get_stitching_mask(events, dataset, 'DYJetsToLL_inclusive', 70)
